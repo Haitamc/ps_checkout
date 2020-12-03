@@ -150,6 +150,7 @@ services:
     public: true
     arguments:
       - '@ps_checkout.configuration'
+      - '@ps_checkout.accounts.service'
 
   ps_checkout.store.module.psx:
     class: 'PrestaShop\Module\PrestashopCheckout\Presenter\Store\Modules\PsxModule'
@@ -288,3 +289,7 @@ services:
     arguments:
       - '@ps_checkout.funding_source.collection.builder'
       - '@ps_checkout.funding_source.presenter'
+
+  ps_checkout.accounts.service:
+    class: 'PrestaShop\AccountsAuth\Service\PsAccountsService'
+    public: true

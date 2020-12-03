@@ -20,6 +20,7 @@
 use Monolog\Logger;
 use PrestaShop\Module\PrestashopCheckout\Api\Payment\Onboarding;
 use PrestaShop\Module\PrestashopCheckout\Api\Psx\Onboarding as PsxOnboarding;
+use PrestaShop\Module\PrestashopCheckout\Entity\PsAccount;
 use PrestaShop\Module\PrestashopCheckout\Logger\LoggerDirectory;
 use PrestaShop\Module\PrestashopCheckout\Logger\LoggerFactory;
 use PrestaShop\Module\PrestashopCheckout\Logger\LoggerFileFinder;
@@ -178,8 +179,11 @@ class AdminAjaxPrestashopCheckoutController extends ModuleAdminController
             $this->ajaxDie(json_encode($errors));
         }
 
+        /** @var PrestaShop\Module\PrestashopCheckout\Configuration\PrestaShopConfiguration $configuration */
+        $configuration = $this->module->getService('ps_checkout.configuration');
+
         // Save form in database
-        if (false === $this->savePsxForm($psxForm)) {
+        if (false === $configuration->set(PsAccount::PS_CHECKOUT_PSX_FORM, json_encode($psxForm))) {
             $this->ajaxDie(json_encode(['Cannot save in database.']));
         }
 
@@ -239,26 +243,6 @@ class AdminAjaxPrestashopCheckoutController extends ModuleAdminController
                 'transactions' => $transactionOrder->present(),
             ])
         );
-    }
-
-    /**
-     * Update the psx form
-     *
-     * @param array $form
-     *
-     * @return bool
-     */
-    private function savePsxForm($form)
-    {
-        /** @var \PrestaShop\Module\PrestashopCheckout\Repository\PsAccountRepository $accountRepository */
-        $accountRepository = $this->module->getService('ps_checkout.repository.prestashop.account');
-        $psAccount = $accountRepository->getOnboardedAccount();
-        $psAccount->setPsxForm(json_encode($form));
-
-        /** @var \PrestaShop\Module\PrestashopCheckout\PersistentConfiguration $persistentConfiguration */
-        $persistentConfiguration = $this->module->getService('ps_checkout.persistent.configuration');
-
-        return $persistentConfiguration->savePsAccount($psAccount);
     }
 
     /**
